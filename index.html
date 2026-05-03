@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestor de Tareas Cloud</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+            padding: 30px;
+        }
+        input {
+            padding: 10px;
+            width: 250px;
+        }
+        button {
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        li {
+            list-style: none;
+            margin: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌐 Gestor de Tareas (Cloud)</h1>
+
+    <input type="text" id="taskInput" placeholder="Escribe una tarea">
+    <button onclick="addTask()">Agregar</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        const API_URL = "https://proyecto-cloud-t8vg.onrender.com/tasks";
+
+        async function loadTasks() {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+
+            const list = document.getElementById("taskList");
+            list.innerHTML = "";
+
+            data.forEach((task, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    ${task} 
+                    <button onclick="deleteTask(${index})">❌</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        async function addTask() {
+            const input = document.getElementById("taskInput");
+            const task = input.value;
+
+            if (!task) return;
+
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ task })
+            });
+
+            input.value = "";
+            loadTasks();
+        }
+
+        async function deleteTask(index) {
+            await fetch(`${API_URL}/${index}`, {
+                method: "DELETE"
+            });
+
+            loadTasks();
+        }
+
+        loadTasks();
+    </script>
+
+</body>
+</html>
